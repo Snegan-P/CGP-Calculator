@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login and CGPA Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .container {
+            max-width: 400px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input[type="text"], input[type="password"], input[type="number"], button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="loginContainer">
+        <h1>Login</h1>
+        <label for="username">Username or Email:</label>
+        <input type="text" id="username" placeholder="Enter username or email" required>
+        
+        <label for="password">Password:</label>
+        <input type="password" id="password" placeholder="Enter password" required>
+        
+        <button onclick="validateLogin()">Login</button>
+        
+        <div class="error" id="error"></div>
+    </div>
+
+    <div class="container hidden" id="cgpaContainer">
+        <h1>CGPA Calculator</h1>
+        <div id="subjectInputs">
+            <label for="marks1">Marks for Subject 1:</label>
+            <input type="number" class="marks" placeholder="Enter marks" required>
+            <label for="credits1">Credits for Subject 1:</label>
+            <input type="number" class="credits" placeholder="Enter credits" required>
+        </div>
+        <button onclick="addSubject()">Add Another Subject</button>
+        <button onclick="calculateCGPA()">Calculate CGPA</button>
+        <button onclick="logout()">Logout</button>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        let subjectCount = 1;
+
+        function validateLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('error');
+
+            // Regular expression for password validation
+            const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+            if (!username) {
+                errorDiv.innerText = 'Please enter your username or email.';
+                return;
+            }
+
+            if (!passwordPattern.test(password)) {
+                errorDiv.innerText = 'Password must be at least 8 characters long, including uppercase, lowercase, numbers, and special characters.';
+                return;
+            }
+
+            // If validation passes, hide the login container and show the CGPA container
+            document.getElementById('loginContainer').classList.add('hidden');
+            document.getElementById('cgpaContainer').classList.remove('hidden');
+            errorDiv.innerText = ''; // Clear error message
+        }
+
+        function addSubject() {
+            subjectCount++;
+            const subjectInputs = document.getElementById('subjectInputs');
+            const newInputs = `
+                <label for="marks${subjectCount}">Marks for Subject ${subjectCount}:</label>
+                <input type="number" class="marks" placeholder="Enter marks" required>
+                <label for="credits${subjectCount}">Credits for Subject ${subjectCount}:</label>
+                <input type="number" class="credits" placeholder="Enter credits" required>
+            `;
+            subjectInputs.insertAdjacentHTML('beforeend', newInputs);
+        }
+
+        function calculateCGPA() {
+            const marks = document.querySelectorAll('.marks');
+            const credits = document.querySelectorAll('.credits');
+
+            let totalWeightedMarks = 0;
+            let totalCredits = 0;
+
+            for (let i = 0; i < marks.length; i++) {
+                const mark = parseFloat(marks[i].value);
+                const credit = parseFloat(credits[i].value);
+                if (!isNaN(mark) && !isNaN(credit) && credit > 0) {
+                    totalWeightedMarks += mark * credit;
+                    totalCredits += credit;
+                }
+            }
+
+            if (totalCredits > 0) {
+                const cgpa = (totalWeightedMarks / totalCredits).toFixed(2);
+                document.getElementById('result').innerText = `Your CGPA is: ${cgpa}`;
+            } else {
+                document.getElementById('result').innerText = 'Please enter valid inputs.';
+            }
+        }
+
+        function logout() {
+            // Reset the form and go back to the login page
+            subjectCount = 1;
+            document.getElementById('cgpaContainer').classList.add('hidden');
+            document.getElementById('loginContainer').classList.remove('hidden');
+            document.getElementById('error').innerText = '';
+
+            // Clear username and password fields
+            document.getElementById('username').value = 'username';
+            document.getElementById('password').value = 'Password@123';
+            resetForm(); // Reset the CGPA input fields
+        }
+
+        function resetForm() {
+            document.getElementById('subjectInputs').innerHTML = `
+                <label for="marks1">Marks for Subject 1:</label>
+                <input type="number" class="marks" placeholder="Enter marks" required>
+                <label for="credits1">Credits for Subject 1:</label>
+                <input type="number" class="credits" placeholder="Enter credits" required>
+            `;
+            document.getElementById('result').innerText = '';
+        }
+    </script>
+
+</body>
+</html>
